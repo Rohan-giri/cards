@@ -1,0 +1,13 @@
+[
+    {
+      "cardId": "12345",
+      "initialValue": 100,
+      "totalRedeemed": 0,
+      "remainingBalance": 100,
+      "status": "Active",
+      "issueDate": "2024-12-03",
+      "customerName": "John Doe",
+      "paymentMethod": "Cash"
+    }
+  ]
+  

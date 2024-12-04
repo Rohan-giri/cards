@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gift Card Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Gift Card Tracker</h1>
+  </header>
+  <main>
+    <form id="giftCardForm">
+      <input type="text" id="cardId" placeholder="Card ID" required>
+      <input type="number" id="initialValue" placeholder="Initial Value (£)" required>
+      <input type="text" id="customerName" placeholder="Customer Name" required>
+      <select id="paymentMethod" required>
+        <option value="">Select Payment Method</option>
+        <option value="Cash">Cash</option>
+        <option value="Card">Card</option>
+        <option value="Complimentary">Complimentary</option>
+      </select>
+      <button type="button" onclick="addGiftCard()">Add Gift Card</button>
+    </form>
+    <h2>Gift Card Dashboard</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Card ID</th>
+          <th>Initial Value (£)</th>
+          <th>Total Redeemed (£)</th>
+          <th>Remaining Balance (£)</th>
+          <th>Status</th>
+          <th>Issue Date</th>
+          <th>Customer Name</th>
+          <th>Payment Method</th>
+        </tr>
+      </thead>
+      <tbody id="dashboard"></tbody>
+    </table>
+  </main>
+  <script>
+    const apiUrl = "/.netlify/functions/manageJson";
+
+    async function fetchGiftCards() {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+
+      const tbody = document.getElementById("dashboard");
+      tbody.innerHTML = ""; // Clear table
+
+      data.forEach((card) => {
+        const row = `
+          <tr>
+            <td>${card.cardId}</td>
+            <td>£${card.initialValue.toFixed(2)}</td>
+            <td>£${card.totalRedeemed.toFixed(2)}</td>
+            <td>£${card.remainingBalance.toFixed(2)}</td>
+            <td>${card.status}</td>
+            <td>${card.issueDate}</td>
+            <td>${card.customerName}</td>
+            <td>${card.paymentMethod}</td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    }
+
+    async function addGiftCard() {
+      const cardId = document.getElementById("cardId").value;
+      const initialValue = parseFloat(document.getElementById("initialValue").value);
+      const customerName = document.getElementById("customerName").value;
+      const paymentMethod = document.getElementById("paymentMethod").value;
+
+      const newCard = {
+        cardId,
+        initialValue,
+        totalRedeemed: 0,
+        remainingBalance: initialValue,
+        status: "Active",
+        issueDate: new Date().toISOString().split("T")[0],
+        customerName,
+        paymentMethod,
+      };
+
+      await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCard),
+      });
+
+      fetchGiftCards(); // Refresh table
+    }
+
+    fetchGiftCards(); // Load data on page load
+  </script>
+</body>
+</html>
